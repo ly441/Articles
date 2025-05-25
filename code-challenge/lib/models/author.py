@@ -1,5 +1,5 @@
 
-from lib.db.connection import get_connection
+import psycopg2
 from psycopg2 import IntegrityError
 from datetime import datetime
 from psycopg2.extras import RealDictCursor
