@@ -1,7 +1,7 @@
 import pytest
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from lib.models.author import Author
+from ..lib.models.author import Author
 import os
 
 # Test Database Setup
