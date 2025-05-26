@@ -62,7 +62,7 @@ Author.set_connection({
 })
 
 # Create author and magazine
-author = Author.create("Jane Smith", "Tech journalist")
+author = Author.create("lemayian olekolii", "Tech journalist")
 magazine = Magazine.create("Tech Insights", "Technology")
 
 # Create a new article
