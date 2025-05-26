@@ -10,7 +10,7 @@ def db_connection():
     connection_params = {
         "dbname": "test_magazine_db",
         "user": "postgres",
-        "password": "lynn123",
+        "password": "postgres",
         "host": "localhost",
         "port": 5432
     }
@@ -22,8 +22,8 @@ def db_connection():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS magazines (
                 id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                category TEST NOT NULL
+                name VARCHAR(100) NOT NULL,
+                category VARCHAR(50) NOT NULL
             )
         """)
         conn.commit()

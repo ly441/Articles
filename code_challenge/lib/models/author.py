@@ -8,12 +8,12 @@ import os
 
 class Author:
     _connection = None
-    def __init__(self, name, email, bio=None, id=None):
+    def __init__(self, name, email, bio=None, id=None, created_at=None):
         self.id = id
         self.name = name
         self.email = email
         self.bio = bio
-        self.created_at = datetime.now()
+        self.created_at = created_at or datetime.now()
 
     
     def __repr__(self):
@@ -51,7 +51,7 @@ class Author:
         conn = psycopg2.connect(
             dbname=os.getenv("DB_NAME", "articles_challenge"),
             user=os.getenv("DB_USER", "postgres"),
-            password=os.getenv("DB_PASSWORD", ""),
+            password=os.getenv("DB_PASSWORD", "postgres"),
             host=os.getenv("DB_HOST", "localhost")
         )
         cursor = conn.cursor()
@@ -94,7 +94,7 @@ class Author:
         conn = psycopg2.connect(
             dbname=os.getenv("DB_NAME", "articles_challenge"),
             user=os.getenv("DB_USER", "postgres"),
-            password=os.getenv("DB_PASSWORD", ""),
+            password=os.getenv("DB_PASSWORD", "postgres"),
             host=os.getenv("DB_HOST", "localhost")
         )
         cursor = conn.cursor(cursor_factory=DictCursor)
@@ -111,7 +111,7 @@ class Author:
         conn = psycopg2.connect(
             dbname=os.getenv("DB_NAME", "articles_challenge"),
             user=os.getenv("DB_USER", "postgres"),
-            password=os.getenv("DB_PASSWORD", ""),
+            password=os.getenv("DB_PASSWORD", "postgres"),
             host=os.getenv("DB_HOST", "localhost")
         )
         cursor = conn.cursor(cursor_factory=DictCursor)
@@ -130,7 +130,7 @@ class Author:
         conn = psycopg2.connect(
             dbname=os.getenv("DB_NAME", "articles_challenge"),
             user=os.getenv("DB_USER", "postgres"),
-            password=os.getenv("DB_PASSWORD", ""),
+            password=os.getenv("DB_PASSWORD", "postgres"),
             host=os.getenv("DB_HOST", "localhost")
         )
         cursor = conn.cursor(cursor_factory=DictCursor)

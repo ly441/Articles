@@ -14,8 +14,9 @@ conn.close()
 Magazine.set_connection({
     "dbname": "articles.db",
     "user": "postgress",
-    "password": "space",
-    "host": "localhost"
+    "password": "postgres",
+    "host": "localhost",
+    "port": 5432
 })
 
 # Create a new magazine
@@ -45,20 +46,23 @@ tech_mag.delete()
 Article.set_connection({
     "dbname": "articles.db",
     "user": "postgress",
-    "password": "space",
-    "host": "localhost"
+    "password": "posgres",
+    "host": "localhost",
+    "port": 5432
 })
 Magazine.set_connection({
-    "dbname": "your_database",
-    "user": "your_username",
-    "password": "your_password",
-    "host": "localhost"
+    "dbname": "articles.db",
+    "user": "postgress",
+    "password": "posgres",
+    "host": "localhost",
+    "port": 5432
 })
 Author.set_connection({
     "dbname": "articles.db",
     "user": "postgress",
-    "password": "space",
-    "host": "localhost"
+    "password": "posgres",
+    "host": "localhost",
+    "port": 5432
 })
 
 # Create author and magazine

@@ -15,7 +15,7 @@ def test_db():
     conn = psycopg2.connect(
         dbname=os.getenv("DB_NAME", "articles_challenge"),
         user=os.getenv("DB_USER", "postgres"),
-        password=os.getenv("DB_PASSWORD", ""),
+        password=os.getenv("DB_PASSWORD", "postgres"),
         host=os.getenv("DB_HOST", "localhost")
     )
     cursor = conn.cursor()
@@ -37,7 +37,8 @@ def test_db():
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             published_at TIMESTAMP WITH TIME ZONE,
-            author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE
+            author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
+            magazine_id INTEGER REFERENCES magazines(id) ON DELETE SET NULL       
         )
     """)
     
@@ -50,7 +51,7 @@ def db_connection(test_db):
     conn = psycopg2.connect(
         dbname=os.getenv("DB_NAME", "articles_challenge"),
         user=os.getenv("DB_USER", "postgres"),
-        password=os.getenv("DB_PASSWORD", ""),
+        password=os.getenv("DB_PASSWORD", "postgres"),
         host=os.getenv("DB_HOST", "localhost")
     )
     cursor = conn.cursor()
@@ -78,7 +79,7 @@ def db_connection(test_db):
 @pytest.fixture
 def test_author(db_connection):
     """Fixture providing a test author"""
-    with db_connection.cursor() as cursor:
+    with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute("SELECT * FROM authors LIMIT 1")
         return Author(**cursor.fetchone())
 
@@ -87,7 +88,9 @@ def test_article(db_connection):
     """Fixture providing a test article"""
     with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute("SELECT * FROM articles LIMIT 1")
-        return Article(**cursor.fetchone())
+        row = cursor.fetchone()
+        return Author(**row)
+
 
 # Test Cases
 def test_author_initialization():

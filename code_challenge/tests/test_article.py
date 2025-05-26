@@ -13,7 +13,7 @@ def db_connection():
     connection_params = {
         "dbname": "test_articles_db",
         "user": "postgres",  
-        "password": "lynn123",
+        "password": "postgres",
         "host": "localhost",
         "port" : 5432
     }
