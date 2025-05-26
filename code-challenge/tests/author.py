@@ -127,6 +127,7 @@ def test_duplicate_email():
     author = Author("Duplicate", "test@example.com")
     with pytest.raises(ValueError, match="already exists"):
         author.save()
+        
 def test_magazines_method(self):
     # Create second magazine
     magazine2 = Magazine.create("Tech Weekly", "Technology")
