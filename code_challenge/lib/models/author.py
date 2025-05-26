@@ -13,7 +13,7 @@ class Author:
         self.name = name
         self.email = email
         self.bio = bio
-        self.created_at = created_at or datetime.now()
+        self.created_at = created_at
 
     
     def __repr__(self):

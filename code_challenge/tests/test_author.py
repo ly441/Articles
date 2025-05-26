@@ -81,7 +81,7 @@ def test_author(db_connection):
     """Fixture providing a test author"""
     with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
         cursor.execute("SELECT * FROM authors LIMIT 1")
-        return Author(**cursor.fetchone())
+        return Article(**cursor.fetchone())
 
 @pytest.fixture
 def test_article(db_connection):
