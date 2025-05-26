@@ -150,11 +150,20 @@ def test_duplicate_email(test_author):
     with pytest.raises(ValueError, match="already exists"):
         Author("Duplicate", test_author.email).save()
 
-def test_magazines_method(db_connection, test_author):
+
+def test_magazines_method(db_connection, test_author, test_magazine):
     """Test author's magazines relationship"""
-    # Create test magazines
-    magazine1 = Magazine.create("Tech Today", "Technology")
-    magazine2 = Magazine.create("Tech Weekly", "Technology")
+    # Create article linking author and magazine
+    with db_connection.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO articles (title, author_id, magazine_id)
+            VALUES ('Test Article', %s, %s)
+        """, (test_author.id, test_magazine))
+        db_connection.commit()
+    
+    magazines = test_author.magazines()
+    assert len(magazines) == 1
+    assert magazines[0].name == "Tech Today"
     
     # Create articles
     Article.create("Python Tips", "Content", test_author.id, magazine1.id)
