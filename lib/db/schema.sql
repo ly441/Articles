@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS magazines CASCADE;
 
 
 
-CREATE TABLE authors (
+CREATE TABLE IF NOT EXIST authors (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE authors (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, 
 );
 
-CREATE TABLE magazines(
+CREATE TABLE IF NOT EXISTS magazines(
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(255) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE magazines(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     );
 
-CREATE TABLE articles (
+CREATE TABLE IF NOT EXIST articles (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255)NOT NULL,
     content TEXT NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE articles (
 
 -
 
-CREATE TABLE author_magazine (
+CREATE TABLE IF NOT EXIST author_magazine (
     author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
     magazine_id INTEGER NOT NULL REFERENCES magazines(id) ON DELETE CASCADE,
     role VARCHAR(50),

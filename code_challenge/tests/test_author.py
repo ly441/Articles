@@ -8,6 +8,8 @@ from code_challenge.lib.models.article import Article
 from code_challenge.lib.models.magazine import Magazine
 
 
+
+
 # Fixtures
 @pytest.fixture(scope="module")
 def test_db():
