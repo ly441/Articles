@@ -184,5 +184,46 @@ class Magazine:
                     GROUP BY m.id
                 """)
                 return {row[1]: row[2] for row in cursor.fetchall()}
+    @classmethod
+    def contributors(self):
+        """Get all authors who have written for this magazine"""
+        from author import Author
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT a.* FROM authors a
+                    JOIN articles ar ON a.id = ar.author_id
+                    WHERE ar.magazine_id = %s
+                """, (self.id,))
+                return [Author(
+                    row['name'],
+                    row['bio'],
+                    row['id']
+                ) for row in cursor.fetchall()]
+    def article_titles(self):
+        """Get titles of all articles in this magazine"""
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT title FROM articles
+                    WHERE magazine_id = %s
+                """, (self.id,))
+                return [row['title'] for row in cursor.fetchall()]
+
+    def contributor_authors(self):
+        """Get all authors who have written for this magazine"""
+        from author import Author
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT a.* FROM authors a
+                    JOIN articles ar ON a.id = ar.author_id
+                    WHERE ar.magazine_id = %s
+                """, (self.id,))
+                return [Author(
+                    row['name'],
+                    row['bio'],
+                    row['id']
+                ) for row in cursor.fetchall()]                         
 
     

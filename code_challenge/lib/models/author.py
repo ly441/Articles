@@ -214,3 +214,32 @@ class Author:
                 if result:
                     return cls.find_by_id(result['author_id'])
                 return None
+    def add_article(self,magazine,title):
+        """Add an articles to this author"""
+        from article import Article
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO articles (title, author_id, magazine_id)
+                    VALUES (%s, %s, %s)
+                    RETURNING id;
+                """, (title, self.id, magazine.id))
+                article_id = cursor.fetchone()[0]
+                conn.commit()
+                return Article(title=title, author_id=self.id, magazine_id=magazine.id, id=article_id)   
+    @classmethod
+    def topic_areas(self):
+        """Get all unique topic areas from authors' bios"""
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT bio FROM authors
+                    WHERE bio IS NOT NULL AND bio != '';
+                """)
+                bios = cursor.fetchall()
+                topics = set()
+                for bio in bios:
+                    if bio[0]:
+                        topics.update(bio[0].split(','))
+                return [topic.strip() for topic in topics if topic.strip()]
+
