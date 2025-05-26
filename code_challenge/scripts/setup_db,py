@@ -1,0 +1,13 @@
+from psycopg2 import connect, sql
+
+from lib.db.connection import get_connection
+
+def create_indexes():
+    conn = get_connection()
+    with conn:
+        with conn.cursor() as cursor:
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_articles_author_id ON articles(author_id);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_articles_magazine_id ON articles(magazine_id);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_articles_title ON articles(title);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_magazines_category ON magazines(category);")
+    print("Indexes created.")

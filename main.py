@@ -119,3 +119,21 @@ article.save()
 
 # Delete an article
 article.delete()
+
+# Example usage
+author = Author.find_by_id(1)
+magazine = Magazine.find_by_id(1)
+
+# Get author's topic areas
+print(f"Author specializes in: {', '.join(author.topic_areas())}")
+
+# Add new article
+new_article = author.add_article(
+    magazine=magazine,
+    title="New Research Findings",
+    content="Detailed analysis..."
+)
+
+# Get magazine statistics
+print(f"Magazine titles: {magazine.article_titles()}")
+print(f"Top contributors: {magazine.contributing_authors()}")
