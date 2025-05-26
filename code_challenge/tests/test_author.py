@@ -177,17 +177,84 @@ def test_save_new_author(db_connection):
     assert saved_author.id is not None
     assert saved_author.created_at is not None    
 
-def test_most_prolific(db_connection):
+def test_most_prolific(db_connection, test_magazine):
     """Test finding most prolific author"""
     # Create test authors
-    author1 = Author("Author 1", "author1@test.com").save()
-    author2 = Author("Author 2", "author2@test.com").save()
+    author1 = Author(name="Author 1", email="author1@test.com").save()
+    author2 = Author(name="Author 2", email="author2@test.com").save()
     
+    # Create articles
+    with db_connection.cursor() as cursor:
+        # Author 1: 3 articles
+        cursor.execute("""
+            INSERT INTO articles (title, author_id, magazine_id)
+            VALUES (%s, %s, %s),
+                   (%s, %s, %s),
+                   (%s, %s, %s)
+        """, (
+            "Art 1", author1.id, test_magazine,
+            "Art 2", author1.id, test_magazine,
+            "Art 3", author1.id, test_magazine
+        ))
+        
+        # Author 2: 2 articles
+        cursor.execute("""
+            INSERT INTO articles (title, author_id, magazine_id)
+            VALUES (%s, %s, %s),
+                   (%s, %s, %s)
+        """, (
+            "Art 4", author2.id, test_magazine,
+            "Art 5", author2.id, test_magazine
+        ))
+        db_connection.commit()
+    
+    prolific = Author.most_prolific()
+    assert prolific.id == author1.id
+
     # Create articles
     Article.create("Article 1", "Content", author1.id, 1)
     Article.create("Article 2", "Content", author1.id, 1)
     Article.create("Article 3", "Content", author1.id, 1)
     Article.create("Article 4", "Content", author2.id, 1)
+
+@pytest.fixture
+def test_magazine(db_connection):
+    with db_connection.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO magazines (name, category)
+            VALUES ('Tech Today', 'Technology')
+            RETURNING id
+        """)
+        magazine_id = cursor.fetchone()[0]
+        db_connection.commit()
+    return magazine_id
+
+def test_save_new_author(db_connection):
+    """Test saving new author"""
+    Author.set_connection(db_connection)
+    author = Author(name="Unique Author", email="unique@test.com")
+    saved_author = author.save()
+    assert saved_author.id is not None
+
+def test_find_by_name():
+    """Test name search"""
+    Author.set_connection(db_connection)
+    Author(name="Search Test", email="search@test.com").save()
+    results = Author.find_by_name("search")
+    assert len(results) == 1  # Ensure test isolation
+
+def test_author_articles_relationship(db_connection, test_magazine):
+    """Test article relationships"""
+    author = Author(name="Rel Author", email="rel@test.com").save()
+    with db_connection.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO articles (title, content, author_id, magazine_id)
+            VALUES ('Test Article', 'Content', %s, %s)
+        """, (author.id, test_magazine))
+    
+    articles = author.articles()
+    assert len(articles) == 1
+    assert articles[0].magazine_id == test_magazine  # Add this assertion   
     
     prolific = Author.most_prolific()
     assert prolific.id == author1.id

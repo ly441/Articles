@@ -2,6 +2,8 @@
 import pytest
 import psycopg2
 from code_challenge.lib.models.magazine import Magazine
+from code_challenge.lib.models.author import Author
+
 
 # Fixtures
 @pytest.fixture(scope="module")
@@ -87,6 +89,58 @@ def test_find_by_name_and_category():
     Magazine.create("Tech Today", "Technology")
     Magazine.create("Tech Weekly", "Technology")
     Magazine.create("Science News", "Science")
+
+def test_magazines_method(db_connection, test_author, test_magazine):
+    """Test author's magazines relationship"""
+    # Create article linking author and magazine
+    with db_connection.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO articles (title, author_id, magazine_id)
+            VALUES ('Test Article', %s, %s)
+        """, (test_author.id, test_magazine))
+        db_connection.commit()
+    
+    magazines = test_author.magazines()
+    assert len(magazines) == 1
+    assert magazines[0].name == "Tech Today"
+
+def test_most_prolific(db_connection, test_magazine):
+    """Test finding most prolific author"""
+    
+    author1 = Author(name="Author 1", email="author1@test.com").save()
+    author2 = Author(name="Author 2", email="author2@test.com").save()
+    
+    # Create articles
+    with db_connection.cursor() as cursor:
+        # Author 1: 3 articles
+        cursor.execute("""
+            INSERT INTO articles (title, author_id, magazine_id)
+            VALUES (%s, %s, %s),
+                   (%s, %s, %s),
+                   (%s, %s, %s)
+        """, (
+            "Art 1", author1.id, test_magazine,
+            "Art 2", author1.id, test_magazine,
+            "Art 3", author1.id, test_magazine
+        ))
+        
+        # Author 2: 2 articles
+        cursor.execute("""
+            INSERT INTO articles (title, author_id, magazine_id)
+            VALUES (%s, %s, %s),
+                   (%s, %s, %s)
+        """, (
+            "Art 4", author2.id, test_magazine,
+            "Art 5", author2.id, test_magazine
+        ))
+        db_connection.commit()
+    
+    prolific = Author.most_prolific()
+    assert prolific.id == author1.id        
+    
+    magazines = test_author.magazines()
+    assert len(magazines) == 1
+    assert magazines[0].name == "Tech Today"  
     
     # Test name search
     tech_mags = Magazine.find_by_name("tech")
