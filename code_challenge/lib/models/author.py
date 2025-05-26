@@ -45,7 +45,7 @@ class Author:
             raise ValueError("Invalid email format")
         self._email = value.lower().strip()
     
-    @property
+    
     def save(self):
         """Save the author to the database"""
         conn = psycopg2.connect(

@@ -164,6 +164,19 @@ def test_magazines_method(db_connection, test_author):
     assert len(magazines) == 2
     assert {m.name for m in magazines} == {"Tech Today", "Tech Weekly"}
 
+def test_save_new_author(db_connection):
+    """Test saving a new author to the database"""
+    # Setup
+    Author.set_connection(db_connection)
+    
+    # Test
+    author = Author(name="Test Author", email="test@example.com")
+    saved_author = author.save()
+    
+    # Assert
+    assert saved_author.id is not None
+    assert saved_author.created_at is not None    
+
 def test_most_prolific(db_connection):
     """Test finding most prolific author"""
     # Create test authors

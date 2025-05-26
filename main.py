@@ -44,22 +44,22 @@ tech_mag.delete()
 
 # Set up database connection
 Article.set_connection({
-    "dbname": "articles.db",
-    "user": "postgress",
+    "dbname": "articles_challenge",
+    "user": "postgres",
     "password": "posgres",
     "host": "localhost",
     "port": 5432
 })
 Magazine.set_connection({
-    "dbname": "articles.db",
-    "user": "postgress",
+    "dbname": "articles_challenge",
+    "user": "postgres",
     "password": "posgres",
     "host": "localhost",
     "port": 5432
 })
 Author.set_connection({
-    "dbname": "articles.db",
-    "user": "postgress",
+    "dbname": "articles_challenge",
+    "user": "postgres",
     "password": "posgres",
     "host": "localhost",
     "port": 5432
