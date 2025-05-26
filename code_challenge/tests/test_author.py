@@ -1,9 +1,15 @@
-import pytest
+
+import unittest
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from lib.models.author import Author
+from code_challenge.lib.models.article import Article
+from code_challenge.lib.models.magazine import Magazine
 import os
 
+class TestArticle(unittest.TestCase):
+    def test_something(self):
+        self.assertTrue(True)
 # Test Database Setup
 @pytest.fixture(scope="module")
 def test_db():

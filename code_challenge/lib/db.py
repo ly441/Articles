@@ -2,7 +2,7 @@
 import psycopg2
 import psycopg2.extras
 from contextlib import contextmanager
-from config import db_config
+from code_challenge.config import db_config
 
 class Transaction:
     def __init__(self):

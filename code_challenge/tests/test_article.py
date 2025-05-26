@@ -1,6 +1,6 @@
 import unittest
 import psycopg2
-from article import Article
+from code_challenge.tests.test_article import Article
 
 class TestArticle(unittest.TestCase):
     @classmethod
