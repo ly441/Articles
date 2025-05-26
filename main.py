@@ -1,7 +1,8 @@
 
 from lib.db.connection import get_connection
-from code-challenge.lib.models.magazine import Magazine
-
+from code_challenge.lib.models.magazine import Magazine
+from code_challenge.lib.models.article import Article
+from code_challenge.lib.models.author import Author
 
 # Test the connection
 conn = get_connection()
@@ -12,9 +13,9 @@ conn.close()
 
 # Set up database connection
 Magazine.set_connection({
-    "dbname": "your_database",
-    "user": "your_username",
-    "password": "your_password",
+    "dbname": "articles.db",
+    "user": "lynn kolii",
+    "password": "space",
     "host": "localhost"
 })
 
@@ -40,3 +41,82 @@ print(f"Total magazines: {len(all_mags)}")
 
 # Delete a magazine
 tech_mag.delete()
+
+# Set up database connection
+Article.set_connection({
+    "dbname": "your_database",
+    "user": "your_username",
+    "password": "your_password",
+    "host": "localhost"
+})
+Magazine.set_connection({
+    "dbname": "your_database",
+    "user": "your_username",
+    "password": "your_password",
+    "host": "localhost"
+})
+Author.set_connection({
+    "dbname": "your_database",
+    "user": "your_username",
+    "password": "your_password",
+    "host": "localhost"
+})
+
+# Create author and magazine
+author = Author.create("Jane Smith", "Tech journalist")
+magazine = Magazine.create("Tech Insights", "Technology")
+
+# Create a new article
+article = Article.create(
+    "The Future of AI",
+    "Exploring the latest trends in artificial intelligence...",
+    author.id,
+    magazine.id
+)
+
+# Find articles by title
+ai_articles = Article.find_by_title("AI")
+for art in ai_articles:
+    print(f"{art.title} by {art.author().name} in {art.magazine().name}")
+
+# Update an article
+article.title = "The Future of Artificial Intelligence"
+article.save()
+
+# Get all articles in a magazine
+magazine_articles = Article.find_by_magazine_id(magazine.id)
+print(f"Articles in {magazine.name}: {len(magazine_articles)}")
+
+# Delete an article
+article.delete()
+# Configure database connection
+db_config = {
+    "dbname": "your_database",
+    "user": "your_username",
+    "password": "your_password",
+    "host": "localhost"
+}
+
+# Set connection for all classes
+Article.set_connection(db_config)
+
+# Create a new article
+new_article = Article.create(
+    title="Python Programming",
+    content="All about Python...",
+    author_id=1,  # Existing author ID
+    magazine_id=1  # Existing magazine ID
+)
+
+# Find articles by title
+python_articles = Article.find_by_title("python")
+for article in python_articles:
+    print(f"Found: {article.title}")
+
+# Update an article
+article = Article.find_by_id(1)
+article.title = "Advanced Python Programming"
+article.save()
+
+# Delete an article
+article.delete()
