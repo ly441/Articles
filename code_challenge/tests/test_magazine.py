@@ -138,7 +138,7 @@ def test_most_prolific(db_connection, test_magazine):
     prolific = Author.most_prolific()
     assert prolific.id == author1.id        
     
-    magazines = test_author.magazines()
+    magazines = author1.magazines()
     assert len(magazines) == 1
     assert magazines[0].name == "Tech Today"  
     

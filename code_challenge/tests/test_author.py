@@ -141,11 +141,18 @@ def test_find_by_name():
     assert len(results) == 1
     assert results[0].name == "Search Test"
 
-def test_author_articles_relationship(test_author, test_article):
-    """Test author-articles relationship"""
-    articles = test_author.articles()
-    assert len(articles) == 1
-    assert articles[0].title == "Test Article"
+# tests/test_author.py
+def test_author_articles_relationship(db_connection, magazine):
+    author = Author(name="Test", email="test@example.com").save()
+    
+    with db_connection.cursor() as cur:
+        cur.execute("""
+            INSERT INTO articles (title, author_id, magazine_id)
+            VALUES ('Test Article', %s, %s)
+        """, (author.id, magazine))
+        db_connection.commit()
+    
+    assert len(author.articles()) == 1
 
 def test_duplicate_email(test_author):
     """Test duplicate email validation"""
@@ -155,7 +162,8 @@ def test_duplicate_email(test_author):
 
 def test_magazines_method(db_connection, test_author, test_magazine):
     """Test author's magazines relationship"""
-    # Create article linking author and magazine
+    magazine1 = Magazine.create("Tech Today", "Technology")
+    magazine2 = Magazine.create("Tech Weekly", "Technology")
     with db_connection.cursor() as cursor:
         cursor.execute("""
             INSERT INTO articles (title, author_id, magazine_id)
@@ -268,4 +276,4 @@ def test_author_articles_relationship(db_connection, test_magazine):
     assert articles[0].magazine_id == test_magazine  # Add this assertion   
     
     prolific = Author.most_prolific()
-    assert prolific.id == author1.id
+    assert prolific.id == author.id
