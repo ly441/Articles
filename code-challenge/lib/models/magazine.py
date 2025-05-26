@@ -129,3 +129,4 @@ class Magazine:
 
     def __repr__(self):
         return f"<Magazine id={self.id} name='{self.name}' category='{self.category}'>"
+    

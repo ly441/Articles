@@ -2,7 +2,7 @@
 import psycopg2
 from psycopg2 import IntegrityError
 from datetime import datetime
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import DictCursor
 from datetime import datetime
 import os
 
@@ -90,7 +90,7 @@ class Author:
             password=os.getenv("DB_PASSWORD", ""),
             host=os.getenv("DB_HOST", "localhost")
         )
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor = conn.cursor(cursor_factory=DictCursor)
         
         cursor.execute("SELECT * FROM authors WHERE id = %s;", (author_id,))
         result = cursor.fetchone()
@@ -107,7 +107,7 @@ class Author:
             password=os.getenv("DB_PASSWORD", ""),
             host=os.getenv("DB_HOST", "localhost")
         )
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor = conn.cursor(cursor_factory=DictCursor)
         
         cursor.execute("SELECT * FROM authors WHERE name ILIKE %s;", (f"%{name}%",))
         results = cursor.fetchall()
@@ -126,7 +126,7 @@ class Author:
             password=os.getenv("DB_PASSWORD", ""),
             host=os.getenv("DB_HOST", "localhost")
         )
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor = conn.cursor(cursor_factory=DictCursor)
         
         cursor.execute(
             """
@@ -162,3 +162,55 @@ class Author:
             "bio": self.bio,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
+    
+    
+    def articles(self):
+        """Get all articles written by this author"""
+        from article import Article
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT * FROM articles
+                    WHERE author_id = %s
+                """, (self.id,))
+                return [Article(
+                    row['title'],
+                    row['content'],
+                    row['author_id'],
+                    row['magazine_id'],
+                    row['id']
+                ) for row in cursor.fetchall()]
+
+    def magazines(self):
+        """Find all magazines this author has contributed to"""
+        from magazine import Magazine
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT m.* FROM magazines m
+                    JOIN articles a ON m.id = a.magazine_id
+                    WHERE a.author_id = %s
+                """, (self.id,))
+                return [Magazine(
+                    row['name'],
+                    row['category'],
+                    row['id']
+                ) for row in cursor.fetchall()]
+
+    @classmethod
+    def most_prolific(cls):
+        """Find the author with the most articles"""
+        from article import Article
+        with psycopg2.connect(**cls._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT author_id, COUNT(*) as article_count
+                    FROM articles
+                    GROUP BY author_id
+                    ORDER BY article_count DESC
+                    LIMIT 1
+                """)
+                result = cursor.fetchone()
+                if result:
+                    return cls.find_by_id(result['author_id'])
+                return None
