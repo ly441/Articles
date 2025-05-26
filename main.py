@@ -12,7 +12,7 @@ conn.close()
 
 # Set up database connection
 Magazine.set_connection({
-    "dbname": "articles.db",
+    "dbname": "articles_challenge",
     "user": "postgress",
     "password": "postgres",
     "host": "localhost",
@@ -94,8 +94,8 @@ print(f"Articles in {magazine.name}: {len(magazine_articles)}")
 article.delete()
 # Configure database connection
 db_config = {
-    "dbname": "articles.db",
-    "user": "postgress",
+    "dbname": "articles_challenge",
+    "user": "postgres",
     "password": "space",
     "host": "localhost"
 }
