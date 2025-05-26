@@ -127,3 +127,21 @@ def test_duplicate_email():
     author = Author("Duplicate", "test@example.com")
     with pytest.raises(ValueError, match="already exists"):
         author.save()
+def test_magazines_method(self):
+    # Create second magazine
+    magazine2 = Magazine.create("Tech Weekly", "Technology")
+    Article.create("Python Tips", "Content", self.author.id, self.magazine.id)
+    Article.create("Rust Guide", "Content", self.author.id, magazine2.id)
+    
+    magazines = self.author.magazines()
+    self.assertEqual(len(magazines), 2)
+    self.assertEqual({m.name for m in magazines}, {"Tech Today", "Tech Weekly"})
+
+def test_most_prolific(self):
+    author2 = Author.create("Jane Smith", "Writer")
+    Article.create("Article 1", "Content", self.author.id, self.magazine.id)
+    Article.create("Article 2", "Content", self.author.id, self.magazine.id)
+    Article.create("Article 3", "Content", author2.id, self.magazine.id)
+    
+    prolific = Author.most_prolific()
+    self.assertEqual(prolific.id, self.author.id)       

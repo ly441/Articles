@@ -129,4 +129,60 @@ class Magazine:
 
     def __repr__(self):
         return f"<Magazine id={self.id} name='{self.name}' category='{self.category}'>"
+    def authors(self):
+        """Get all authors who have written for this magazine"""
+        from author import Author
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT a.* FROM authors a
+                    JOIN articles ar ON a.id = ar.author_id
+                    WHERE ar.magazine_id = %s
+                """, (self.id,))
+                return [Author(
+                    row['name'],
+                    row['bio'],
+                    row['id']
+                ) for row in cursor.fetchall()]
+
+    @classmethod
+    def find_with_multiple_authors(cls):
+        """Find magazines with articles by at least 2 different authors"""
+        with psycopg2.connect(**cls._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT m.* FROM magazines m
+                    JOIN articles a ON m.id = a.magazine_id
+                    GROUP BY m.id
+                    HAVING COUNT(DISTINCT a.author_id) >= 2
+                """)
+                return [cls(
+                    row['name'],
+                    row['category'],
+                    row['id']
+                ) for row in cursor.fetchall()]
+
+    def article_count(self):
+        """Count the number of articles in this magazine"""
+        with psycopg2.connect(**self._connection) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT COUNT(*) FROM articles
+                    WHERE magazine_id = %s
+                """, (self.id,))
+                return cursor.fetchone()[0]
+
+    @classmethod
+    def all_article_counts(cls):
+        """Count of articles in each magazine"""
+        with psycopg2.connect(**cls._connection) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT m.id, m.name, COUNT(a.id) as article_count
+                    FROM magazines m
+                    LEFT JOIN articles a ON m.id = a.magazine_id
+                    GROUP BY m.id
+                """)
+                return {row[1]: row[2] for row in cursor.fetchall()}
+
     
