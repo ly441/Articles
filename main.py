@@ -64,7 +64,8 @@ Author.set_connection({
     "host": "localhost",
     "port": 5432
 })
-
+new_author = Author(name="jane wambui",email="janewambui@gmail.com")
+saved_author = new_author.save()
 # Create author and magazine
 author = Author.create("lemayian olekolii", "Tech journalist","Violeta Kioki","motivation and inspiration")
 magazine = Magazine.create("Tech Insights", "Technology","inspiration and motivation","emotional intelligence")
