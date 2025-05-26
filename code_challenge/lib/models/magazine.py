@@ -225,22 +225,30 @@ class Magazine:
                     row['bio'],
                     row['id']
                 ) for row in cursor.fetchall()]   
+    
+    
+    
+    
     @classmethod
     def top_publisher(cls):
         """Find the magazine with the most articles"""
         with psycopg2.connect(**cls._connection) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
                 cursor.execute("""
-                    SELECT magazine_id, COUNT(*) as article_count
-                    FROM articles
-                    GROUP BY magazine_id
+                    SELECT m.id, m.name, m.category, COUNT(a.id) as article_count
+                    FROM magazines m
+                    LEFT JOIN articles a ON m.id = a.magazine_id
+                    GROUP BY m.id
                     ORDER BY article_count DESC
                     LIMIT 1
                 """)
                 result = cursor.fetchone()
-                if result:
-                    return cls.find_by_id(result['magazine_id'])
-                return None                              
-
+                if result and result['article_count'] > 0:
+                    return cls(
+                        result['name'],
+                        result['category'],
+                        result['id']
+                    )
+                return None
     def __repr__(self):
        return f"<Magazine {self.id}: {self.name} ({self.category})>"
