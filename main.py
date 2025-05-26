@@ -62,8 +62,8 @@ Author.set_connection({
 })
 
 # Create author and magazine
-author = Author.create("lemayian olekolii", "Tech journalist")
-magazine = Magazine.create("Tech Insights", "Technology")
+author = Author.create("lemayian olekolii", "Tech journalist","Violeta Kioki","motivation and inspiration")
+magazine = Magazine.create("Tech Insights", "Technology","inspiration and motivation","emotional intelligence")
 
 # Create a new article
 article = Article.create(
@@ -90,9 +90,9 @@ print(f"Articles in {magazine.name}: {len(magazine_articles)}")
 article.delete()
 # Configure database connection
 db_config = {
-    "dbname": "your_database",
-    "user": "your_username",
-    "password": "your_password",
+    "dbname": "articles.db",
+    "user": "lynn kolii",
+    "password": "space",
     "host": "localhost"
 }
 

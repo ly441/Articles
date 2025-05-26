@@ -242,4 +242,5 @@ class Magazine:
                     return cls.find_by_id(result['magazine_id'])
                 return None                              
 
-    
+    def __repr__(self):
+       return f"<Magazine {self.id}: {self.name} ({self.category})>"

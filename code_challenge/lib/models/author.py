@@ -242,4 +242,7 @@ class Author:
                     if bio[0]:
                         topics.update(bio[0].split(','))
                 return [topic.strip() for topic in topics if topic.strip()]
+            
+def __repr__(self):
+    return f"<Author {self.id}: {self.name}>"
 
