@@ -3,7 +3,7 @@
 from code_challenge.lib.models.author import Author
 from code_challenge.lib.models.magazine import Magazine
 from code_challenge.lib.models.article import Article
-from code_challenge.lib.db import add_author_with_articles
+from code_challenge.lib.controllers.db import add_author_with_articles
 def cli():
     print("📚 Magazine Database CLI")
     while True:
