@@ -1,6 +1,6 @@
 
 from lib.db.connection import get_connection
-from lib.models.magazine import Magazine
+from code-challenge.lib.models.magazine import Magazine
 
 
 # Test the connection
