@@ -9,8 +9,8 @@ CREATE TABLE authors (
 
 CREATE TABLE magazines(
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    category VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(255) NOT NULL,
     description TEXT,
     frequency VARCHAR(50) CHECK (frequency IN ('weekly', 'monthly', 'quarterly', 'yearly')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -18,7 +18,7 @@ CREATE TABLE magazines(
 
 CREATE TABLE articles (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(200)NOT NULL,
+    title VARCHAR(255)NOT NULL,
     content TEXT NOT NULL,
     published_at TIMESTAMP WITH TIME ZONE,
     status VARCHAR(20) CHECK (status IN ('draft', 'published', 'archived')) DEFAULT 'draft',
