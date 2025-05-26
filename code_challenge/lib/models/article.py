@@ -10,12 +10,13 @@ class Article:
         """Set the database connection parameters for all Article instances."""
         cls._connection = connection_params
 
-    def __init__(self, title, content, author_id, magazine_id, id=None):
+    def __init__(self, title, content, author_id, magazine_id, id=None,published_at=None):
         self.id = id
         self.title = title
         self.content = content
         self.author_id = author_id
         self.magazine_id = magazine_id
+        self.published_at = published_at  
         self._validate()
 
     def _validate(self):
