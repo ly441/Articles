@@ -3,8 +3,7 @@ from lib.db.connection import get_connection
 from code_challenge.lib.models.magazine import Magazine
 from code_challenge.lib.models.article import Article
 from code_challenge.lib.models.author import Author
-
-# Test the connection
+# Test database connection
 conn = get_connection()
 cursor = conn.cursor()
 cursor.execute("SELECT NOW() as current_time;")
