@@ -7,15 +7,22 @@ from datetime import datetime
 import os
 
 class Author:
+    _connection = None
     def __init__(self, name, email, bio=None, id=None):
         self.id = id
         self.name = name
         self.email = email
         self.bio = bio
         self.created_at = datetime.now()
+
     
     def __repr__(self):
         return f"<Author(id={self.id}, name='{self.name}', email='{self.email}')>"
+    
+    @classmethod
+    def set_connection(cls,connection_params):
+        """Set the database connection parameters"""
+        cls._connection = connection_params
     
     # === Validations ===
     @property

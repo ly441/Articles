@@ -9,9 +9,10 @@ def db_connection():
     """Module-scoped database connection and setup"""
     connection_params = {
         "dbname": "test_magazine_db",
-        "user": "your_username",
-        "password": "your_password",
-        "host": "localhost"
+        "user": "postgres",
+        "password": "lynn123",
+        "host": "localhost",
+        "port": 5432
     }
     Magazine.set_connection(connection_params)
     

@@ -92,9 +92,9 @@ def test_article(db_connection):
 # Test Cases
 def test_author_initialization():
     """Test Author class initialization"""
-    author = Author("John Doe", "john@example.com")
-    assert author.name == "John Doe"
-    assert author.email == "john@example.com"
+    author = Author("Josephine Doeller", "josephine@example.com")
+    assert author.name == "Josephine Doeller"
+    assert author.email == "josephine@example.com"
     assert author.id is None
 
 @pytest.mark.parametrize("name,email", [

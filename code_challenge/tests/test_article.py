@@ -11,10 +11,11 @@ from code_challenge.lib.models.magazine import Magazine
 def db_connection():
     """Module-scoped database setup"""
     connection_params = {
-        "dbname": "test_db",
-        "user": "postgres",
-        "password": "yourpassword",
-        "host": "localhost"
+        "dbname": "test_articles_db",
+        "user": "postgres",  
+        "password": "lynn123",
+        "host": "localhost",
+        "port" : 5432
     }
     
     # Set connections for all models
@@ -28,7 +29,7 @@ def db_connection():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS authors (
                 id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
+                name TEXT NOT NULL,
                 bio TEXT
             )
         """)

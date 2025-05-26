@@ -1,6 +1,6 @@
 db_config = {
     "dbname": "articles.db",
-    "user": "lynn kolii",
-    "password": "space",
+    "user": "postgres",
+    "password": " ",
     "host": "localhost"
 }

@@ -13,7 +13,7 @@ conn.close()
 # Set up database connection
 Magazine.set_connection({
     "dbname": "articles.db",
-    "user": "lynn kolii",
+    "user": "postgress",
     "password": "space",
     "host": "localhost"
 })
@@ -43,9 +43,9 @@ tech_mag.delete()
 
 # Set up database connection
 Article.set_connection({
-    "dbname": "your_database",
-    "user": "your_username",
-    "password": "your_password",
+    "dbname": "articles.db",
+    "user": "postgress",
+    "password": "space",
     "host": "localhost"
 })
 Magazine.set_connection({
@@ -55,9 +55,9 @@ Magazine.set_connection({
     "host": "localhost"
 })
 Author.set_connection({
-    "dbname": "your_database",
-    "user": "your_username",
-    "password": "your_password",
+    "dbname": "articles.db",
+    "user": "postgress",
+    "password": "space",
     "host": "localhost"
 })
 
@@ -91,7 +91,7 @@ article.delete()
 # Configure database connection
 db_config = {
     "dbname": "articles.db",
-    "user": "lynn kolii",
+    "user": "postgress",
     "password": "space",
     "host": "localhost"
 }
