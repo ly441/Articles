@@ -1,16 +1,14 @@
 
-import unittest
+import pytest
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from lib.models.author import Author
+import os
+from code_challenge.lib.models.author import Author
 from code_challenge.lib.models.article import Article
 from code_challenge.lib.models.magazine import Magazine
-import os
 
-class TestArticle(unittest.TestCase):
-    def test_something(self):
-        self.assertTrue(True)
-# Test Database Setup
+
+# Fixtures
 @pytest.fixture(scope="module")
 def test_db():
     """Create test database structure"""
@@ -46,9 +44,9 @@ def test_db():
     conn.commit()
     conn.close()
 
-@pytest.fixture(autouse=True)
-def clean_tables(test_db):
-    """Clean tables before each test"""
+@pytest.fixture
+def db_connection(test_db):
+    """Database connection with clean state"""
     conn = psycopg2.connect(
         dbname=os.getenv("DB_NAME", "articles_challenge"),
         user=os.getenv("DB_USER", "postgres"),
@@ -57,6 +55,7 @@ def clean_tables(test_db):
     )
     cursor = conn.cursor()
     
+    # Clean tables
     cursor.execute("TRUNCATE TABLE articles RESTART IDENTITY CASCADE")
     cursor.execute("TRUNCATE TABLE authors RESTART IDENTITY CASCADE")
     
@@ -73,9 +72,24 @@ def clean_tables(test_db):
     )
     
     conn.commit()
+    yield conn
     conn.close()
 
-# === Test Cases ===
+@pytest.fixture
+def test_author(db_connection):
+    """Fixture providing a test author"""
+    with db_connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM authors LIMIT 1")
+        return Author(**cursor.fetchone())
+
+@pytest.fixture
+def test_article(db_connection):
+    """Fixture providing a test article"""
+    with db_connection.cursor(cursor_factory=RealDictCursor) as cursor:
+        cursor.execute("SELECT * FROM articles LIMIT 1")
+        return Article(**cursor.fetchone())
+
+# Test Cases
 def test_author_initialization():
     """Test Author class initialization"""
     author = Author("John Doe", "john@example.com")
@@ -83,23 +97,25 @@ def test_author_initialization():
     assert author.email == "john@example.com"
     assert author.id is None
 
-def test_name_validation():
+@pytest.mark.parametrize("name,email", [
+    ("J", "john@example.com"),
+    ("", "john@example.com")
+])
+def test_name_validation(name, email):
     """Test name validation"""
     with pytest.raises(ValueError, match="at least 2 characters"):
-        Author("J", "john@example.com")
-    
-    with pytest.raises(ValueError):
-        Author("", "john@example.com")
+        Author(name, email)
 
-def test_email_validation():
+@pytest.mark.parametrize("email", [
+    "invalid-email",
+    "missing@dot"
+])
+def test_email_validation(email):
     """Test email validation"""
     with pytest.raises(ValueError, match="Invalid email format"):
-        Author("John Doe", "invalid-email")
-    
-    with pytest.raises(ValueError):
-        Author("John Doe", "missing@dot")
+        Author("John Doe", email)
 
-def test_save_new_author():
+def test_save_new_author(db_connection):
     """Test saving a new author"""
     author = Author("New Author", "new@example.com")
     saved_author = author.save()
@@ -107,48 +123,55 @@ def test_save_new_author():
     assert saved_author.id is not None
     assert saved_author.name == "New Author"
 
-def test_find_by_id():
+def test_find_by_id(test_author):
     """Test finding author by ID"""
-    author = Author.find_by_id(1)
-    assert author is not None
-    assert author.name == "Test Author"
-    assert author.email == "test@example.com"
+    found = Author.find_by_id(test_author.id)
+    assert found.name == "Test Author"
+    assert found.email == "test@example.com"
 
 def test_find_by_name():
     """Test finding authors by name"""
-    authors = Author.find_by_name("Test")
-    assert len(authors) == 1
-    assert authors[0].name == "Test Author"
+    Author("Search Test", "search@test.com").save()
+    results = Author.find_by_name("Test")
+    assert len(results) == 1
+    assert results[0].name == "Search Test"
 
-def test_author_articles_relationship():
+def test_author_articles_relationship(test_author, test_article):
     """Test author-articles relationship"""
-    author = Author.find_by_id(1)
-    articles = author.articles()
-    
+    articles = test_author.articles()
     assert len(articles) == 1
     assert articles[0].title == "Test Article"
 
-def test_duplicate_email():
+def test_duplicate_email(test_author):
     """Test duplicate email validation"""
-    author = Author("Duplicate", "test@example.com")
     with pytest.raises(ValueError, match="already exists"):
-        author.save()
-        
-def test_magazines_method(self):
-    # Create second magazine
-    magazine2 = Magazine.create("Tech Weekly", "Technology")
-    Article.create("Python Tips", "Content", self.author.id, self.magazine.id)
-    Article.create("Rust Guide", "Content", self.author.id, magazine2.id)
-    
-    magazines = self.author.magazines()
-    self.assertEqual(len(magazines), 2)
-    self.assertEqual({m.name for m in magazines}, {"Tech Today", "Tech Weekly"})
+        Author("Duplicate", test_author.email).save()
 
-def test_most_prolific(self):
-    author2 = Author.create("Jane Smith", "Writer")
-    Article.create("Article 1", "Content", self.author.id, self.magazine.id)
-    Article.create("Article 2", "Content", self.author.id, self.magazine.id)
-    Article.create("Article 3", "Content", author2.id, self.magazine.id)
+def test_magazines_method(db_connection, test_author):
+    """Test author's magazines relationship"""
+    # Create test magazines
+    magazine1 = Magazine.create("Tech Today", "Technology")
+    magazine2 = Magazine.create("Tech Weekly", "Technology")
+    
+    # Create articles
+    Article.create("Python Tips", "Content", test_author.id, magazine1.id)
+    Article.create("Rust Guide", "Content", test_author.id, magazine2.id)
+    
+    magazines = test_author.magazines()
+    assert len(magazines) == 2
+    assert {m.name for m in magazines} == {"Tech Today", "Tech Weekly"}
+
+def test_most_prolific(db_connection):
+    """Test finding most prolific author"""
+    # Create test authors
+    author1 = Author("Author 1", "author1@test.com").save()
+    author2 = Author("Author 2", "author2@test.com").save()
+    
+    # Create articles
+    Article.create("Article 1", "Content", author1.id, 1)
+    Article.create("Article 2", "Content", author1.id, 1)
+    Article.create("Article 3", "Content", author1.id, 1)
+    Article.create("Article 4", "Content", author2.id, 1)
     
     prolific = Author.most_prolific()
-    self.assertEqual(prolific.id, self.author.id)       
+    assert prolific.id == author1.id
