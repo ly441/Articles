@@ -250,5 +250,8 @@ class Magazine:
                         result['id']
                     )
                 return None
+            
+
+             
     def __repr__(self):
        return f"<Magazine {self.id}: {self.name} ({self.category})>"

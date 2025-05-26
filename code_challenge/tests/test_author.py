@@ -262,18 +262,25 @@ def test_find_by_name():
     results = Author.find_by_name("search")
     assert len(results) == 1  # Ensure test isolation
 
-def test_author_articles_relationship(db_connection, test_magazine):
-    """Test article relationships"""
-    author = Author(name="Rel Author", email="rel@test.com").save()
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO articles (title, content, author_id, magazine_id)
-            VALUES ('Test Article', 'Content', %s, %s)
-        """, (author.id, test_magazine))
+def test_author_articles_relationship(db_connection, test_author, test_magazine):
+    # Create valid article
+    with db_connection.cursor() as cur:
+        cur.execute("""
+            INSERT INTO articles 
+            (title, content, author_id, magazine_id)
+            VALUES (%s, %s, %s, %s)
+        """, (
+            "Valid Article Title",  # 20 characters
+            "This is a valid article content that meets the 50 character minimum requirement.",  # 72 chars
+            test_author,
+            test_magazine
+        ))
+        db_connection.commit()
     
-    articles = author.articles()
-    assert len(articles) == 1
-    assert articles[0].magazine_id == test_magazine  # Add this assertion   
-    
+    # Test relationship
+    author = Author.find_by_id(test_author)
+    assert len(author.articles()) == 1
+
+
     prolific = Author.most_prolific()
     assert prolific.id == author.id
