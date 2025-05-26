@@ -34,7 +34,8 @@ class TestMagazine(unittest.TestCase):
                 conn.commit()
 
     def test_initialization_and_validation(self):
-        # Test valid initialization
+        
+        
         mag = Magazine("Tech Today", "Technology")
         self.assertEqual(mag.name, "Tech Today")
         self.assertEqual(mag.category, "Technology")
