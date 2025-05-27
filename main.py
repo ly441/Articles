@@ -67,8 +67,8 @@ Author.set_connection({
 new_author = Author(name="jane wambui",email="janewambui@gmail.com")
 saved_author = new_author.save()
 # Create author and magazine
-author = Author.create("lemayian olekolii", "Tech journalist","Violeta Kioki","motivation and inspiration")
-magazine = Magazine.create("Tech Insights", "Technology","inspiration and motivation","emotional intelligence")
+author = Author.create("jane wambui", "Tech journalist",)
+magazine = Magazine.create("Tech Insights", "Technology",)
 
 # Create a new article
 article = Article.create(

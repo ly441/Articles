@@ -103,8 +103,8 @@ def test_author_initialization():
     assert author.id is None
 
 @pytest.mark.parametrize("name,email", [
-    ("J", "john@example.com"),
-    ("", "john@example.com")
+    ("J", "josephine@example.com"),
+    ("", "josephine@example.com")
 ])
 def test_name_validation(name, email):
     """Test name validation"""
@@ -118,7 +118,7 @@ def test_name_validation(name, email):
 def test_email_validation(email):
     """Test email validation"""
     with pytest.raises(ValueError, match="Invalid email format"):
-        Author("John Doe", email)
+        Author("Josephine Doeller", email)
 
 def test_save_new_author(db_connection):
     """Test saving a new author"""
@@ -199,8 +199,8 @@ def test_save_new_author(db_connection):
 def test_most_prolific(db_connection, test_magazine):
     """Test finding most prolific author"""
     # Create test authors
-    author1 = Author(name="Author 1", email="author1@test.com").save()
-    author2 = Author(name="Author 2", email="author2@test.com").save()
+    author1 = Author(name="Anita", email="anita@gmail.com").save()
+    author2 = Author(name="Builder", email="builder@gmail.com").save()
     
     # Create articles
     with db_connection.cursor() as cursor:
