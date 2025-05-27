@@ -7,7 +7,14 @@ from datetime import datetime
 import os
 
 class Author:
-    _connection = None
+    _connection ={
+        "dbname":"articles_challenge",
+        "user":"postgres",
+        "password":"postgres",
+        "host":"localhost",
+        "port":5432
+    }
+
     def __init__(self, name, email, bio=None, id=None, created_at=None):
         self.id = id
         self.name = name

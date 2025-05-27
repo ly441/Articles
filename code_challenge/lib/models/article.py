@@ -6,6 +6,7 @@ class Article:
     _connection = None
     
     @classmethod
+    
     def set_connection(cls, connection_params):
         """Set the database connection parameters for all Article instances."""
         cls._connection = connection_params
