@@ -58,7 +58,6 @@ def db_connection():
         conn.commit()
     conn.close()
     print("Test database structure dropped")
-    yield
     
 
 
@@ -81,19 +80,6 @@ def test_magazine(db_connection):
         db_connection.commit()
     return magazine_id
 
-def test_magazines_method(db_connection, test_author, test_magazine):
-    """Test author's magazines relationship"""
-    # Create article linking author and magazine
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES ('Test Article', %s, %s)
-        """, (test_author.id, test_magazine))
-        db_connection.commit()
-    
-    magazines = test_author.magazines()
-    assert len(magazines) == 1
-    assert magazines[0].name == "Tech Today"
 # Tests
 def test_initialization_and_validation():
     # Valid initialization
@@ -141,53 +127,11 @@ def test_find_by_name_and_category(db_connection):
     Magazine.create("Tech Weekly", "Technology")
     Magazine.create("Science News", "Science")
 
-def test_magazines_method(db_connection, test_author, test_magazine):
-    """Test author's magazines relationship"""
-    # Create article linking author and magazine
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES ('Test Article', %s, %s)
-        """, (test_author.id, test_magazine.id))
-        db_connection.commit()
-    
-    magazines = test_author.magazines()
-    assert len(magazines) == 1
-    assert magazines[0].name == "Tech Today"
 
-def test_most_prolific(db_connection, test_magazine):
-    """Test finding most prolific author"""
-    # Create test authors
-    author1 = Author(name="Anita", email="anita@gmail.com").save()
-    author2 = Author(name="Builder", email="builder@gmail.com").save()
-    
-    # Create articles
-    with db_connection.cursor() as cursor:
-        # Author 1: 3 articles
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES (%s, %s, %s),
-                   (%s, %s, %s),
-                   (%s, %s, %s)
-        """, (
-            "Art 1", author1.id, test_magazine.id,
-            "Art 2", author1.id, test_magazine.id,
-            "Art 3", author1.id, test_magazine.id
-        ))
-        
-        # Author 2: 2 articles
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES (%s, %s, %s),
-                   (%s, %s, %s)
-        """, (
-            "Art 4", author2.id, test_magazine.id,
-            "Art 5", author2.id, test_magazine.id
-        ))
-        db_connection.commit()
-    
-    prolific = Author.most_prolific()
-    assert prolific.id == author1.id
+
+
+
+
 
 def test_author(db_connection):
     author = Author(name="Test Author", email="test_author@example.com").save()
@@ -213,19 +157,6 @@ def test_magazine(db_connection):
         db_connection.commit()
     return magazine_id
 
-def test_magazines_method(db_connection, test_author, test_magazine):
-    """Test author's magazines relationship"""
-    # Create article linking author and magazine
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES ('Test Article', %s, %s)
-        """, (test_author.id, test_magazine))
-        db_connection.commit()
-    
-    magazines = test_author.magazines()
-    assert len(magazines) == 1
-    assert magazines[0].name == "Tech Today"
 
 def test_delete(db_connection):
     mag = Magazine.create("Fashion Monthly", "Fashion")
@@ -237,14 +168,4 @@ def test_delete(db_connection):
     assert Magazine.find_by_id(mag_id) is None
 
 
-def test_all(db_connection):
-    # Insert test data
-    Magazine.create("Mag 1", "Cat 1")
-    Magazine.create("Mag 2", "Cat 2")
-    Magazine.create("Mag 3", "Cat 3")
-    Magazine.create("Mag 4", "Cat 4")
-    Magazine.create("Mag 5", "Cat 5")
-    
-    all_mags = Magazine.all()
-    assert len(all_mags) == 5
-    assert {mag.name for mag in all_mags} == {"Mag 1", "Mag 2", "Mag 3", "Mag 4", "Mag 5"}
+

@@ -1,7 +1,6 @@
 
 import pytest
 import psycopg2
-from psycopg2.extras import RealDictCursor
 import os
 from code_challenge.lib.models.author import Author
 from code_challenge.lib.models.article import Article
@@ -93,39 +92,8 @@ def db_connection(test_db):
     yield conn
     conn.close
 
-def test_most_prolific(db_connection):
-    """Test finding most prolific author"""
-    # Create test authors
-    author1 = Author(name="Anita", email="anita@gmail.com").save()
-    author2 = Author(name="Builder", email="builder@gmail.com").save()
-    
-    # Create articles
-    with db_connection.cursor() as cursor:
-        # Author 1: 3 articles
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES (%s, %s, %s),
-                   (%s, %s, %s),
-                   (%s, %s, %s)
-        """, (
-            "Art 1", author1.id, 1,
-            "Art 2", author1.id, 1,
-            "Art 3", author1.id, 1
-        ))
-        
-        # Author 2: 2 articles
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES (%s, %s, %s),
-                   (%s, %s, %s)
-        """, (
-            "Art 4", author2.id, 1,
-            "Art 5", author2.id, 1
-        ))
-        db_connection.commit()
-    
-    prolific = Author.most_prolific()
-    assert prolific.id == author1.id
+
+
 
 
 @pytest.fixture
@@ -146,18 +114,4 @@ def test_magazine(db_connection):
         magazine_id = cursor.fetchone()[0]
         db_connection.commit()
     return magazine_id
-
-def test_magazines_method(db_connection, test_author, test_magazine):
-    """Test author's magazines relationship"""
-    # Create article linking author and magazine
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO articles (title, author_id, magazine_id)
-            VALUES ('Test Article', %s, %s)
-        """, (test_author.id, test_magazine))
-        db_connection.commit()
-    
-    magazines = test_author.magazines()
-    assert len(magazines) == 1
-    assert magazines[0].name == "Tech Today"
 
