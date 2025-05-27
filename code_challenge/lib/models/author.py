@@ -249,6 +249,14 @@ class Author:
                     if bio[0]:
                         topics.update(bio[0].split(','))
                 return [topic.strip() for topic in topics if topic.strip()]
+    @classmethod
+    def test_duplicate_email(cls, email):
+        """Test if an email already exists in the database"""
+        with psycopg2.connect(**cls._connection) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) FROM authors WHERE email = %s", (email,))
+                count = cursor.fetchone()[0]
+                return count > 0        
             
 def __repr__(self):
     return f"<Author {self.id}: {self.name}>"
