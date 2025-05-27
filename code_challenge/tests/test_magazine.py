@@ -4,7 +4,7 @@ import psycopg2
 from code_challenge.lib.models.magazine import Magazine
 from code_challenge.lib.models.author import Author
 from code_challenge.lib.models.article import Article
-from ..lib.db import get_connection
+from code_challenge.lib.db.connection import get_connection
 
 
 # Fixtures

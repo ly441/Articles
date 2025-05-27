@@ -1,5 +1,5 @@
 
-from lib.db.connection import get_connection
+from code_challenge.lib.db.connection import get_connection
 from code_challenge.lib.models.magazine import Magazine
 from code_challenge.lib.models.article import Article
 from code_challenge.lib.models.author import Author
