@@ -1,6 +1,28 @@
 
-psycopg2-binary>=2.9.0
-pytest>=7.0
-python-dotenv>=1.0.0
-pytest-cov>=4.0
-pytest-mock>=3.0
+# Environment variable files
+.env
+.env.*
+
+# Python bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment folders
+venv/
+env/
+
+# pytest cache
+.pytest_cache/
+
+# Coverage reports (if using coverage.py)
+.coverage
+htmlcov/
+
+# Editor/IDE settings
+.vscode/
+.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
