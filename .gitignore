@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+env/
+venv/
+ENV/
+.venv/
+
+# SQLite database files
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# VSCode settings
+.vscode/
+
+# MacOS files
+.DS_Store
+
+# Python environment files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# MyPy cache
+.mypy_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyCharm files
+.idea/
+
+# Ignore secrets file (if any)
+*.env
+
+# Ignore __pycache__ in any folder
+**/__pycache__/
