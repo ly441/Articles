@@ -5,11 +5,13 @@ from psycopg2.extras import DictCursor
 class Article:
     _connection = None
     
-    @classmethod
     
-    def set_connection(cls, connection_params):
-        """Set the database connection parameters for all Article instances."""
-        cls._connection = connection_params
+    @classmethod
+    def set_connection(cls, conn_params):
+       if isinstance(conn_params, dict):
+        cls._connection = conn_params
+       else:
+        raise ValueError("Connection must be a dict of parameters")
 
     def __init__(self, title, content, author_id, magazine_id, id=None,published_at=None):
         self.id = id
@@ -159,6 +161,32 @@ class Article:
                         row['id']
                     ) for row in cursor.fetchall()
                 ]
+            
+
+    @classmethod
+    def _create_from_db(cls, row):
+        return cls(
+            id=row["id"],
+            title=row["title"],
+            content=row["content"],
+            magazine_id=row["magazine_id"],
+            author_id=row["author_id"]
+        )  
+    @classmethod
+    def get_all(cls):
+        """Get all articles from the database."""
+        with psycopg2.connect(**cls._connection) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute("SELECT * FROM articles")
+                return [
+                    cls(
+                        row['title'],
+                        row['content'],
+                        row['author_id'],
+                        row['magazine_id'],
+                        row['id']
+                    ) for row in cursor.fetchall()
+                ]    
 
     def get_author(self):
         """Get the author of this article."""
@@ -169,6 +197,7 @@ class Article:
         """Get the magazine this article belongs to."""
         from magazine import Magazine  # Avoid circular imports
         return Magazine.find_by_id(self.magazine_id)
-
+   
+   
     def __repr__(self):
         return f"<Article id={self.id} title='{self.title}' author_id={self.author_id} magazine_id={self.magazine_id}>"

@@ -3,7 +3,7 @@ import psycopg2
 from psycopg2 import IntegrityError
 from psycopg2.extras import DictCursor
 from datetime import datetime
-import os
+
 
 class Author:
     _connection = {
@@ -25,9 +25,11 @@ class Author:
         return f"<Author(id={self.id}, name='{self.name}', email='{self.email}')>"
 
     @classmethod
-    def set_connection(cls, connection_params):
-        """Set the database connection parameters"""
-        cls._connection = connection_params
+    def set_connection(cls, conn_params):
+        if isinstance(conn_params, dict):
+            cls._connection = conn_params
+        else:
+            raise ValueError("Connection must be a dict of parameters")
 
     # === Validations ===
     @property
@@ -195,3 +197,19 @@ class Author:
             "bio": self.bio,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
+        
+    @classmethod
+    def get_all(cls):
+        conn = psycopg2.connect(**cls._connection)
+        cursor = conn.cursor(cursor_factory=DictCursor)
+        cursor.execute("SELECT * FROM authors")
+        authors = cursor.fetchall()
+        conn.close()
+        return [cls._create_from_db(row) for row in authors]
+
+    @classmethod
+    def add_author(cls, name, email, bio=None):
+        """Add a new author to the database and return the author with their assigned ID"""
+        new_author = cls(name=name, email=email, bio=bio)
+        saved_author = new_author.save()
+        return saved_author

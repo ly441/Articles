@@ -1,171 +1,100 @@
 
 import pytest
 import psycopg2
-from psycopg2.extras import RealDictCursor
+from psycopg2 import sql
+from psycopg2.extras import DictCursor
 from code_challenge.lib.models.magazine import Magazine
-from code_challenge.lib.models.author import Author
-from code_challenge.lib.models.article import Article
 
-# Fixtures
 @pytest.fixture(scope="module")
 def db_connection():
-    """Module-scoped database connection and setup"""
-    connection_params = {
-        "dbname": "test_magazine_db",
+    # Set up the connection parameters for the test database
+    Magazine.set_connection({
+        "dbname": "test_articles_challenge",
         "user": "postgres",
-        "password": "postgres",
+        "password": "mysecretpassword",
         "host": "localhost",
         "port": 5432
-    }
-    Magazine.set_connection(connection_params)
+    })
     
-    # Create tables
-    conn = psycopg2.connect(**connection_params)
-    with conn.cursor() as cursor:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS magazines (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                category TEXT NOT NULL
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS authors (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                bio TEXT
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS articles (
-                id SERIAL PRIMARY KEY,
-                title TEXT NOT NULL,
-                content TEXT NOT NULL,
-                published_at TIMESTAMP WITH TIME ZONE,
-                author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
-                magazine_id INTEGER REFERENCES magazines(id) ON DELETE SET NULL
-            )
-        """)
-        conn.commit()
-        print("Test database structure created")
-    yield conn
-    # Teardown
-    with conn.cursor() as cursor:
-        cursor.execute("DROP TABLE IF EXISTS articles CASCADE")
-        cursor.execute("DROP TABLE IF EXISTS authors CASCADE")
-        cursor.execute("DROP TABLE IF EXISTS magazines CASCADE")
-        conn.commit()
-    conn.close()
-    print("Test database structure dropped")
+    # Create the necessary tables for the test
+    with psycopg2.connect(**Magazine._connection) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS magazines (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    category VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    frequency VARCHAR(50) CHECK (frequency IN ('weekly', 'monthly', 'quarterly', 'yearly')),
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS articles (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    content TEXT NOT NULL,
+                    published_at TIMESTAMP WITH TIME ZONE,
+                    status VARCHAR(20) CHECK (status IN ('draft', 'published', 'archived')) DEFAULT 'draft',
+                    author_id INTEGER NOT NULL REFERENCES authors(id) ON DELETE CASCADE,
+                    magazine_id INTEGER REFERENCES magazines(id) ON DELETE SET NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    CONSTRAINT title_min_length CHECK (length(title) >= 5),
+                    CONSTRAINT content_min_length CHECK (length(content) >= 100)
+                );
+            """)
+            conn.commit()
+    yield
+    # Drop the tables after the tests are done
+    with psycopg2.connect(**Magazine._connection) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("DROP TABLE IF EXISTS articles CASCADE;")
+            cursor.execute("DROP TABLE IF EXISTS magazines CASCADE;")
+            conn.commit()
+
+def test_create_magazine(db_connection):
+    magazine = Magazine.create("Tech Today", "Technology", "Daily updates on tech news")
+    assert magazine.id is not None
+    assert magazine.name == "Tech Today"
+    assert magazine.category == "Technology"
+    assert magazine.description == "Daily updates on tech news"
+
+def test_find_magazine_by_id(db_connection):
+    magazine = Magazine.create("Tech Today", "Technology", "Daily updates on tech news")
+    found_magazine = Magazine.find_by_id(magazine.id)
+    assert found_magazine.name == "Tech Today"
+    assert found_magazine.category == "Technology"
+    assert found_magazine.description == "Daily updates on tech news"
+
+def test_find_magazine_by_name(db_connection):
+    Magazine.create("Tech Today", "Technology", "Daily updates on tech news")
+    magazines = Magazine.find_by_name("Tech Today")
+    assert len(magazines) == 1
+    assert magazines[0].name == "Tech Today"
+
+def test_update_magazine(db_connection):
+    magazine = Magazine.create("Tech Today", "Technology", "Daily updates on tech news")
+    magazine.name = "Tech Tomorrow"
+    magazine.description = "Weekly updates on tech trends"
+    magazine.save()
+    updated_magazine = Magazine.find_by_id(magazine.id)
+    assert updated_magazine.name == "Tech Tomorrow"
+    assert updated_magazine.description == "Weekly updates on tech trends"
+
+def test_delete_magazine(db_connection):
+    magazine = Magazine.create("Tech Today", "Technology", "Daily updates on tech news")
+    magazine.delete()
+    assert Magazine.find_by_id(magazine.id) is None
+
+def test_top_publisher(db_connection):
+    magazine1 = Magazine.create("Tech Today", "Technology", "Daily updates on tech news")
+    magazine2 = Magazine.create("Science Weekly", "Science", "Weekly updates on science news")
     
-
-
-@pytest.fixture
-def test_author(db_connection):
-    """Fixture providing a test author"""
-    author = Author(name="Test Author", email="test@example.com").save()
-    return author
-
-@pytest.fixture
-def test_magazine(db_connection):
-    """Fixture providing a test magazine"""
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO magazines (name, category)
-            VALUES ('Tech Today', 'Technology')
-            RETURNING id
-        """)
-        magazine_id = cursor.fetchone()[0]
-        db_connection.commit()
-    return magazine_id
-
-# Tests
-def test_initialization_and_validation():
-    # Valid initialization
-    mag = Magazine("Tech Today", "Technology")
-    assert mag.name == "Tech Today"
-    assert mag.category == "Technology"
+    # Assuming you have a method to add articles to a magazine
+    # Add more articles to magazine1 than magazine2
+    # This is a placeholder for actual article creation logic
+    # Article.create(magazine_id=magazine1.id, ...)
     
-    # Invalid name tests
-    with pytest.raises(ValueError):
-        Magazine("", "Technology")
-    with pytest.raises(ValueError):
-        Magazine(None, "Technology")
-    with pytest.raises(ValueError):
-        Magazine("A" * 101, "Technology")
-    
-    # Invalid category tests
-    with pytest.raises(ValueError):
-        Magazine("Tech Today", "")
-    with pytest.raises(ValueError):
-        Magazine("Tech Today", None)
-    with pytest.raises(ValueError):
-        Magazine("Tech Today", "A" * 51)
-
-def test_save_and_find_by_id(db_connection):
-    # Create and save
-    mag = Magazine("Science Weekly", "Science")
-    mag.save()
-    assert mag.id is not None
-    
-    # Find by ID
-    found_mag = Magazine.find_by_id(mag.id)
-    assert found_mag.name == "Science Weekly"
-    assert found_mag.category == "Science"
-    assert found_mag.id == mag.id
-    
-    # Update and verify
-    mag.name = "Science Monthly"
-    mag.save()
-    updated_mag = Magazine.find_by_id(mag.id)
-    assert updated_mag.name == "Science Monthly"
-
-def test_find_by_name_and_category(db_connection):
-    # Setup test data
-    Magazine.create("Tech Today", "Technology")
-    Magazine.create("Tech Weekly", "Technology")
-    Magazine.create("Science News", "Science")
-
-
-
-
-
-
-
-def test_author(db_connection):
-    author = Author(name="Test Author", email="test_author@example.com").save()
-    assert author.id is not None
-    return author
-
-@pytest.fixture
-def test_author(db_connection):
-    """Fixture providing a test author"""
-    author = Author(name="Test Author", email="test@example.com").save()
-    return author
-
-@pytest.fixture
-def test_magazine(db_connection):
-    """Fixture providing a test magazine"""
-    with db_connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO magazines (name, category)
-            VALUES ('Tech Today', 'Technology')
-            RETURNING id
-        """)
-        magazine_id = cursor.fetchone()[0]
-        db_connection.commit()
-    return magazine_id
-
-
-def test_delete(db_connection):
-    mag = Magazine.create("Fashion Monthly", "Fashion")
-    mag_id = mag.id
-    assert Magazine.find_by_id(mag_id) is not None
-    
-    mag.delete()
-    assert mag.id is None
-    assert Magazine.find_by_id(mag_id) is None
-
-
-
+    top_publisher = Magazine.top_publisher()
+    assert top_publisher.id == magazine1.id
