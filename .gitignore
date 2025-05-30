@@ -47,3 +47,4 @@ pip-delete-this-directory.txt
 
 # Ignore __pycache__ in any folder
 **/__pycache__/
+env/
